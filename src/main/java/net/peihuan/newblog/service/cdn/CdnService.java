@@ -12,6 +12,7 @@ import net.peihuan.newblog.bean.enums.ResultEnum;
 import net.peihuan.newblog.config.BlogProperties;
 import net.peihuan.newblog.exception.BaseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,10 +24,12 @@ public class CdnService {
     @Autowired
     private BlogProperties blogProperties;
 
+    @Async
     public void refreshHoleSite() {
         if (blogProperties.getAli().getCdn() == null
                 || StringUtils.isEmpty(blogProperties.getAli().getCdn().getHost())
                 || StringUtils.isEmpty(blogProperties.getAli().getCdn().getRegionId())) {
+            log.info("-------------- 未配置cdn");
             return;
         }
         DefaultProfile profile = DefaultProfile.getProfile(
@@ -38,10 +41,11 @@ public class CdnService {
         // 此参数为刷新的类型， 其值可以为File或Directory。默认值：File。
         request.setObjectType("Directory");
         // 加速的文件位置，wdtest.licai.cn为配置的域名,后加加速的文件名
-        request.setObjectPath("www.peihuan.net" + "/");
+        request.setObjectPath(blogProperties.getAli().getCdn().getHost() + "/");
 
         try {
             RefreshObjectCachesResponse response = client.getAcsResponse(request);
+            log.info("--------------- 刷新cdn refreshTaskId: {}", response.getRefreshTaskId());
             // ......在这里处理自己的逻辑
         } catch (ServerException e) {
             log.error(e.getErrMsg(), e);

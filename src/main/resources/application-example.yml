@@ -22,7 +22,7 @@ blog:
       endpoint: http://oss-cn-hangzhou.aliyuncs.com
       # 桶名称
       bucket-name: your-bucket
-    cnd:
+    cdn:
       # 可用区id https://help.aliyun.com/knowledge_detail/40654.html?spm=5176.13910061.0.0.75ca1477FdcLAM&aly_as=L5ikbwPc
       regionId: cn-hangzhou
       # 博客首页的域名

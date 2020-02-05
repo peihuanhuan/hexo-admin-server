@@ -32,7 +32,6 @@ public class AliStorageServiceImpl implements StorageService {
 
     public void move(String sourceKey, String targetKey) {
         try {
-
             AliyunConfig aliyunConfig = blogProperties.getAli();
             OSS ossClient = new OSSClientBuilder()
                     .build(aliyunConfig.getOss().getEndpoint(), aliyunConfig.getAccessKeyId(), aliyunConfig.getAccessKeySecret());
