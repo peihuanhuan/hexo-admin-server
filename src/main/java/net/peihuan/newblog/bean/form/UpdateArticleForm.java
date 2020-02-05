@@ -9,7 +9,6 @@ import java.util.List;
 
 @Data
 public class UpdateArticleForm {
-    @NotNull
     private Long id;
     @NotBlank
     @Pattern(regexp = "^[^+-./ @#$%*()\\[\\]][^/ @#$%*()\\[\\]]{0,254}$")

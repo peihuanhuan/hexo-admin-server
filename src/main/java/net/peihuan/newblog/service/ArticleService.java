@@ -69,7 +69,8 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
 
     public Article publishNewArticle(NewArticleForm form) {
-        Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle()));
+        Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle())
+                .eq(Article::getPublish, true));
         if (one != null) {
             throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
         }
@@ -77,81 +78,60 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         BeanUtils.copyProperties(form, article);
         article.setTags(ArticleUtil.list2Str(form.getTags()));
         article.setCategories(ArticleUtil.list2Str(form.getCategories()));
-        article.setPublishedTitle(form.getTitle());
+        if (form.getPublish() != null && form.getPublish()) {
+            article.setPublishedTitle(form.getTitle());
+            saveArticleFile(article);
+            log.info("--------------- 发布文章，保存markdown文件完成 {}", article.getTitle());
+            cdnService.refreshHoleSite();
+        }
         save(article);
-        saveArticleFile(article);
-        log.info("--------------- 发布文章，保存markdown文件完成 {}", article.getTitle());
-        cdnService.refreshHoleSite();
         return article;
-    }
-
-    public void unPublish(Long articleId) {
-        Article article = getById(articleId);
-        if (article == null) {
-            throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
-        }
-
-        updatePublishStatus(articleId, false);
-        deleteFile(article.getPublishedTitle());
-        log.info("--------------- 取消发布，删除文件 {}", article.getPublishedTitle());
-        cdnService.refreshHoleSite();
-    }
-
-    public void publish(Long articleId) {
-        Article article = getById(articleId);
-        if (article == null) {
-            throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
-        }
-        updatePublishStatus(articleId, true);
-        saveArticleFile(article);
-        log.info("--------------- 重新发布文章，保存markdown文件完成 {}", article.getTitle());
-        cdnService.refreshHoleSite();
-    }
-
-    public void updatePublishStatus(Long articleId, boolean publish) {
-        Article update = new Article();
-        update.setId(articleId);
-        update.setPublish(publish);
-        updateById(update);
     }
 
     public Article updateArticle(UpdateArticleForm form) {
-        Article article = getById(form.getId());
-        if (article == null) {
-            throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
-        }
-        Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle()));
-        if (one != null && !one.getId().equals(form.getId())) {
-            throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
-        }
-        article.setTitle(form.getTitle());
-        article.setContent(correctImageAddress(form.getTitle(), form.getContent()));
-        article.setTags(ArticleUtil.list2Str(form.getTags()));
-        article.setCategories(ArticleUtil.list2Str(form.getCategories()));
-        article.setUpdateTime(LocalDateTime.now());
-
-        if (form.getPublish() != null) {
-            if (form.getPublish()) {
-                saveArticleFile(article);
-                log.info("--------------- 更新并发布文章，保存markdown文件完成 {}", article.getTitle());
-                if (StringUtils.hasText(article.getPublishedTitle())
-                        && !article.getTitle().equals(article.getPublishedTitle())) {
-                    deleteFile(article.getPublishedTitle());
-                    log.info("--------------- {} 与上次发布的文章标题名不一样，删除上次markdown文件 {}",
-                            article.getTitle(), article.getPublishedTitle());
-                }
-                article.setPublishedTitle(article.getTitle());
-                cdnService.refreshHoleSite();
-            } else {
-                deleteFile(article.getPublishedTitle());
-                log.info("--------------- 取消文章发布，删除markdown文件完成 {}", article.getPublishedTitle());
+        if (form.getId() == null) {
+            NewArticleForm newForm = new NewArticleForm();
+            BeanUtils.copyProperties(form, newForm);
+            return publishNewArticle(newForm);
+        } else {
+            Article article = getById(form.getId());
+            if (article == null) {
+                throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
             }
-            article.setPublish(form.getPublish());
+            Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle())
+                    .eq(Article::getPublish, true));
+            if (one != null && !one.getId().equals(form.getId())) {
+                throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
+            }
+            article.setTitle(form.getTitle());
+            article.setContent(correctImageAddress(form.getTitle(), form.getContent()));
+            article.setTags(ArticleUtil.list2Str(form.getTags()));
+            article.setCategories(ArticleUtil.list2Str(form.getCategories()));
+            article.setUpdateTime(LocalDateTime.now());
+
+            if (form.getPublish() != null) {
+                if (form.getPublish()) {
+                    saveArticleFile(article);
+                    log.info("--------------- 更新并发布文章，保存markdown文件完成 {}", article.getTitle());
+                    if (StringUtils.hasText(article.getPublishedTitle())
+                            && !article.getTitle().equals(article.getPublishedTitle())) {
+                        deleteFile(article.getPublishedTitle());
+                        log.info("--------------- {} 与上次发布的文章标题名不一样，删除上次markdown文件 {}",
+                                article.getTitle(), article.getPublishedTitle());
+                    }
+                    article.setPublishedTitle(article.getTitle());
+                    cdnService.refreshHoleSite();
+                } else {
+                    deleteFile(article.getPublishedTitle());
+                    log.info("--------------- 取消文章发布，删除markdown文件完成 {}", article.getPublishedTitle());
+                }
+                article.setPublish(form.getPublish());
+            }
+
+            updateById(article);
+
+            return article;
         }
-
-        updateById(article);
-
-        return article;
     }
 
 

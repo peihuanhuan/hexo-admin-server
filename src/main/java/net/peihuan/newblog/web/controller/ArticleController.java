@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/article")
@@ -45,17 +46,6 @@ public class ArticleController {
         return RestResult.success();
     }
 
-    @PutMapping("/publish/{id}")
-    public RestResult publish(@PathVariable Long id) {
-        articleService.publish(id);
-        return RestResult.success();
-    }
-
-    @PutMapping("/unpublish/{id}")
-    public RestResult unpublish(@PathVariable Long id) {
-        articleService.unPublish(id);
-        return RestResult.success();
-    }
 
     @PostMapping
     public RestResult newArticle(@RequestBody @Valid NewArticleForm form) {
@@ -65,8 +55,11 @@ public class ArticleController {
 
 
     @PutMapping
+    @SuppressWarnings("unchecked")
     public RestResult updateArticle(@RequestBody @Valid UpdateArticleForm form) {
         Article article = articleService.updateArticle(form);
-        return RestResult.success(article.getContent());
+        RestResult result = RestResult.success("content", article.getContent());
+        ((Map)result.getData()).put("id", String.valueOf(article.getId()));
+        return result;
     }
 }

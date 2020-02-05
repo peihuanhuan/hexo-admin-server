@@ -30,7 +30,7 @@ public enum ResultEnum {
 
     ARTICLE_NOT_FOUND(1000, "文章不存在"),
 
-    ARTICLE_TITLE_EXIST(1001, "标题已存在"),
+    ARTICLE_TITLE_EXIST(1001, "已有正发布的相同标题的文章"),
 
     USER_NOT_FOUND(2000, "用户不存在"),
 
