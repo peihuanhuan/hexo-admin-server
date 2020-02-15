@@ -49,7 +49,8 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     @SuppressWarnings("unchecked")
     public Page page(String title, Integer page, Integer limit) {
         Page page1 = page(new Page(page, limit),
-                Wrappers.<Article>lambdaQuery().like(title != null, Article::getTitle, title));
+                Wrappers.<Article>lambdaQuery().like(title != null, Article::getTitle, title)
+                        .orderByDesc(Article::getId));
 
         page1.setRecords(ArticleUtil.convert2VO(page1.getRecords()));
         return page1;
