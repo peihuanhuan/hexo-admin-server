@@ -68,6 +68,22 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         cdnService.refreshHoleSite();
     }
 
+    public void unPublish(Long articleId) {
+        Article article = getById(articleId);
+        if (article == null) {
+            throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
+        }
+
+        Article update = new Article();
+        update.setId(articleId);
+        update.setPublish(false);
+        updateById(update);
+
+        deleteFile(article.getPublishedTitle());
+        log.info("--------------- 取消发布，删除文件 {}", article.getPublishedTitle());
+        cdnService.refreshHoleSite();
+    }
+
 
     public Article publishNewArticle(NewArticleForm form) {
         Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle())
