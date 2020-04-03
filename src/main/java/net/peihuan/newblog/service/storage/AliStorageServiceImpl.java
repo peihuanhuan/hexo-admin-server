@@ -46,12 +46,4 @@ public class AliStorageServiceImpl implements StorageService {
             }
         }
     }
-
-    public static void main(String[] args) {
-        OSS ossClient = new OSSClientBuilder()
-                .build("http://oss-cn-hangzhou.aliyuncs.com", "LTAI4Fm1AjN1U5L346Jz57qU", "6HQvGSBoqjHX6rCnDbKIoVObPyAb7a");
-        ossClient.copyObject("peihuan-blog", "a/xx", "peihuan-blog", "a/xx/ac/");
-        ossClient.deleteObject("peihuan-blog", "a/b/c/0fe6541c9ed44bf09b96c01d16d7f199.pdf");
-        ossClient.shutdown();
-    }
 }
