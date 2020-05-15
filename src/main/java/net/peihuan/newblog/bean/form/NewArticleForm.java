@@ -11,7 +11,6 @@ import java.util.List;
 public class NewArticleForm {
 
     @NotBlank
-    @Pattern(regexp = "^[^+-./ @#$%*()\\[\\]][^/ @#$%*()\\[\\]]{0,254}$")
     private String title;
     private String content;
     private List<String> categories;
