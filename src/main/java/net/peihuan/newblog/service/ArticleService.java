@@ -157,15 +157,15 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         if (!staticHost.endsWith("/")) {
             staticHost = staticHost + "/";
         }
-        String[] split = staticHost.split("\\.");
-        String reg = "(!\\[.*?]\\(http[^)]*\\." + split[1] + "\\." + split[2] + ")(\\S+)(/[^)]+)\\)";
+        String[] staticHostSplit = staticHost.split("\\.");
+        String reg = "(!\\[.*?]\\(http[^)]*\\." + staticHostSplit[staticHostSplit.length - 2] + "\\." + staticHostSplit[staticHostSplit.length - 1] + ")(\\S+)(/[^)]+)\\)";
         Pattern filePattern = Pattern.compile(reg);
         Matcher matcher = filePattern.matcher(content);
         while (matcher.find()) {
             String from = matcher.group(2) + matcher.group(3);
             String to = title + matcher.group(3);
             if (!from.equals(to)) {
-                log.info("--------------- oss：移动 {} 至 {}", from, to);
+                log.info("--------------- oss：移动 {} 至 {}, reg: {}", from, to, reg);
                 storageService.move(from, to);
             }
         }
