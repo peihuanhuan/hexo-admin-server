@@ -95,6 +95,8 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         BeanUtils.copyProperties(form, article);
         article.setTags(ArticleUtil.list2Str(form.getTags()));
         article.setCategories(ArticleUtil.list2Str(form.getCategories()));
+        article.setCreateTime(LocalDateTime.now());
+        article.setUpdateTime(LocalDateTime.now());
         if (form.getPublish() != null && form.getPublish()) {
             article.setPublishedTitle(form.getTitle());
             saveArticleFile(article);
