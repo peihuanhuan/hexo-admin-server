@@ -127,7 +127,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 // 只有发布的时候才会更改图片的路径
                 article.setContent(correctImageAddress(form.getTitle(), form.getContent()));
             } else {
-                article.setCategories(form.getContent());
+                article.setContent(form.getContent());
             }
 
             article.setTags(ArticleUtil.list2Str(form.getTags()));
