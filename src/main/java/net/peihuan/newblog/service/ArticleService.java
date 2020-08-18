@@ -123,7 +123,13 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
             }
             article.setTitle(form.getTitle());
-            article.setContent(correctImageAddress(form.getTitle(), form.getContent()));
+            if (form.getPublish() != null && form.getPublish()) {
+                // 只有发布的时候才会更改图片的路径
+                article.setContent(correctImageAddress(form.getTitle(), form.getContent()));
+            } else {
+                article.setCategories(form.getContent());
+            }
+
             article.setTags(ArticleUtil.list2Str(form.getTags()));
             article.setCategories(ArticleUtil.list2Str(form.getCategories()));
             article.setUpdateTime(LocalDateTime.now());
@@ -165,6 +171,8 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         Matcher matcher = filePattern.matcher(content);
         while (matcher.find()) {
             String from = matcher.group(2) + matcher.group(3);
+            // markdown图片链接中最好不要有空格这种字符
+            title = ArticleUtil.trimPictureTitle(title);
             String to = title + matcher.group(3);
             if (!from.equals(to)) {
                 log.info("--------------- oss：移动 {} 至 {}, reg: {}", from, to, reg);

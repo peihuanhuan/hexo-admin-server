@@ -18,6 +18,10 @@ public class ArticleUtil {
     private final String SEPARATED_CONSTANT = ",";
 
 
+    public String trimPictureTitle(String title) {
+        return title.replace(" ", "");
+    }
+
     public ArticleVO convert2VO(Article article) {
         return convert2VO(article, false);
     }
