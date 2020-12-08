@@ -145,14 +145,6 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                         log.info("--------------- {} 与上次发布的文章标题名不一样，删除上次markdown文件 {}",
                                 article.getTitle(), article.getPublishedTitle());
                     }
-                    try {
-                        Runtime.getRuntime().exec("cd "+blogProperties.getHexoPath());
-                        Runtime.getRuntime().exec("hexo g");
-                    }catch (IOException ex){
-                        log.error("--------------- 生成静态文件失败!!!");
-                        log.error(ex.getMessage());
-                    }
-
                     article.setPublishedTitle(article.getTitle());
                     cdnService.refreshHoleSite();
                 } else {
@@ -161,7 +153,14 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 }
                 article.setPublish(form.getPublish());
             }
-
+            // 生成静态文件
+            try {
+                Runtime.getRuntime().exec("cd "+blogProperties.getHexoPath());
+                Runtime.getRuntime().exec("hexo g");
+            }catch (IOException ex){
+                log.error("--------------- 生成静态文件失败!!!");
+                log.error(ex.getMessage());
+            }
             updateById(article);
 
             return article;
