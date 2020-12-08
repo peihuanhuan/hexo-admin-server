@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -144,6 +145,14 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                         log.info("--------------- {} 与上次发布的文章标题名不一样，删除上次markdown文件 {}",
                                 article.getTitle(), article.getPublishedTitle());
                     }
+                    try {
+                        Runtime.getRuntime().exec("cd "+blogProperties.getHexoPath());
+                        Runtime.getRuntime().exec("hexo g");
+                    }catch (IOException ex){
+                        log.error("--------------- 生成静态文件失败!!!");
+                        log.error(ex.getMessage());
+                    }
+
                     article.setPublishedTitle(article.getTitle());
                     cdnService.refreshHoleSite();
                 } else {
