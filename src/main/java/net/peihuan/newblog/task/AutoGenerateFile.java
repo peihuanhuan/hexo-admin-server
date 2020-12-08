@@ -17,7 +17,7 @@ public class AutoGenerateFile {
     @Autowired
     private CdnService cdnService;
 
-    @Scheduled(cron = "0 0 * * * ? *")
+    @Scheduled(cron = "0 0 * * * *")
     public void generateHexoFile() {
 
         log.info("开始生成静态文件！");

@@ -31,19 +31,5 @@ public class AutoUpdateIndex {
         log.info("定时更新 index");
 
     }
-    @Scheduled(cron = "0 0 * * * ? *")
-    public void generateHexoFile() {
-
-        log.info("开始生成静态文件！");
-        Article article = articleService.getById(1L);
-        if (article == null) {
-            return;
-        }
-        articleService.updateIndexHtml(article.getContent());
-        cdnService.refreshHoleSite();
-
-        log.info("定时更新 index");
-
-    }
 
 }
