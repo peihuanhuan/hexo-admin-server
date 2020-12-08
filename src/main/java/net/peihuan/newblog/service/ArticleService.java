@@ -15,6 +15,7 @@ import net.peihuan.newblog.mapper.ArticleMapper;
 import net.peihuan.newblog.service.cdn.CdnService;
 import net.peihuan.newblog.service.storage.StorageService;
 import net.peihuan.newblog.util.ArticleUtil;
+import net.peihuan.newblog.util.CmdUtil;
 import net.peihuan.newblog.util.DateUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -159,20 +163,17 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 }
                 article.setPublish(form.getPublish());
             }
-            // 生成静态文件
-            try {
-                Runtime.getRuntime().exec("cd "+blogProperties.getHexoPath());
-                Runtime.getRuntime().exec("hexo g");
-            }catch (IOException ex){
-                log.error("--------------- 生成静态文件失败!!!");
-                log.error(ex.getMessage());
-            }
+            generateFile();
             updateById(article);
-
             return article;
         }
     }
 
+    public void generateFile(){
+        // 生成静态文件
+        String[] shs = new String[]{"cd " + blogProperties.getHexoPath(), "pwd", "hexo g"};
+        CmdUtil.excuterBashs(shs);
+    }
 
     private String correctImageAddress(String title, String content) {
         String staticHost = blogProperties.getStaticHost();
