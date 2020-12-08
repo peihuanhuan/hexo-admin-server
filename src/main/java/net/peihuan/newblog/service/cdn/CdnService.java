@@ -41,11 +41,12 @@ public class CdnService {
         // 此参数为刷新的类型， 其值可以为File或Directory。默认值：File。
         request.setObjectType("Directory");
         // 加速的文件位置，wdtest.licai.cn为配置的域名,后加加速的文件名
-        request.setObjectPath(blogProperties.getAli().getCdn().getHost() + "/");
+        String objectPath = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
+        request.setObjectPath(objectPath);
 
         try {
             RefreshObjectCachesResponse response = client.getAcsResponse(request);
-            log.info("--------------- 刷新cdn refreshTaskId: {}", response.getRefreshTaskId());
+            log.info("--------------- 刷新cdn  {} refreshTaskId: {}", objectPath, response.getRefreshTaskId());
             // ......在这里处理自己的逻辑
         } catch (ServerException e) {
             log.error(e.getErrMsg(), e);
