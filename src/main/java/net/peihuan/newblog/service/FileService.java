@@ -21,7 +21,6 @@ public class FileService {
     @Autowired
     private BlogProperties properties;
 
-
     public String upload(String title, MultipartFile file) {
         title = ArticleUtil.trimPictureTitle(title);
         String newName = StrUtils.uuid() + "." + FilenameUtils.getExtension(file.getOriginalFilename());

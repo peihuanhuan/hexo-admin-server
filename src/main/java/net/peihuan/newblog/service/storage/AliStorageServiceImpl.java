@@ -14,6 +14,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.peihuan.newblog.bean.enums.ResultEnum;
 import net.peihuan.newblog.bean.vo.RestResult;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import net.peihuan.newblog.bean.enums.ResultEnum;
 import net.peihuan.newblog.config.aliyun.AliyunConfig;
 import net.peihuan.newblog.config.BlogProperties;
 import net.peihuan.newblog.exception.BaseException;
@@ -108,7 +111,8 @@ public class AliStorageServiceImpl implements StorageService {
         } catch (OSSException e) {
             if (e.getErrorCode().equals("NoSuchKey")) {
                 throw new BaseException(ResultEnum.IMAGE_NOT_FOUND, sourceKey);
-            } else {
+
+            } else  {
                 throw new BaseException(ResultEnum.ALI_ERROR);
             }
         }

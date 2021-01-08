@@ -15,6 +15,7 @@ import net.peihuan.newblog.mapper.ArticleMapper;
 import net.peihuan.newblog.service.cdn.CdnService;
 import net.peihuan.newblog.service.storage.StorageService;
 import net.peihuan.newblog.util.ArticleUtil;
+import net.peihuan.newblog.util.CmdUtil;
 import net.peihuan.newblog.util.DateUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,10 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +58,9 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     public Page page(String title, Integer page, Integer limit) {
         Page page1 = page(new Page(page, limit),
                 Wrappers.<Article>lambdaQuery().like(title != null, Article::getTitle, title)
-                        .orderByDesc(Article::getId));
+
+                        .orderByDesc(Article::getCreateTime));
+
 
         page1.setRecords(ArticleUtil.convert2VO(page1.getRecords()));
         return page1;
@@ -112,7 +122,13 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             NewArticleForm newForm = new NewArticleForm();
             BeanUtils.copyProperties(form, newForm);
             return publishNewArticle(newForm);
+
+        } else if (form.getId() == 1) {
+            Article article = updateIndexHtml(form.getContent());
+            cdnService.refreshHoleSite();
+            return article;
         } else {
+
             Article article = getById(form.getId());
             if (article == null) {
                 throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
@@ -153,12 +169,17 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 article.setPublish(form.getPublish());
             }
 
+            generateFile();
             updateById(article);
-
             return article;
         }
     }
 
+    public void generateFile(){
+        // 生成静态文件
+        String[] shs = new String[]{"cd " + blogProperties.getHexoPath(), "pwd", "hexo g"};
+        CmdUtil.excuterBashs(shs);
+    }
 
     private String correctImageAddress(String title, String content) {
         String staticHost = blogProperties.getStaticHost();
@@ -215,6 +236,68 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     }
 
 
+    @SneakyThrows
+    public Article updateIndexHtml(String context) {
+        String[] split = context.split("\n===\n");
+        String before = null;
+        String after;
+        if (split.length == 1) {
+            after = split[0];
+        } else {
+            before = split[0];
+            after = split[1];
+        }
+        //"---\n"
+        //        + "title: Welcome.\n"
+        //        + "date: 2020-11-21 22:31:06\n"
+        //        + "permalink: index.html \n"
+        //        + "---\n"
+        String md = before + getNewArticles() + after;
+
+
+        Path filePath = Paths.get(blogProperties.getHexoPath() + "/source/blog/index.md");
+        Files.deleteIfExists(filePath);
+        Files.createFile(filePath);
+
+        Files.write(filePath, md.getBytes());
+
+        Article article = new Article();
+        article.setContent(context);
+        article.setId(1L);
+        updateById(article);
+        return article;
+    }
+
+    private String getNewArticles() {
+        List<Article> lastArticles = getLastArticles(10);
+        StringBuilder builder = new StringBuilder();
+        lastArticles.forEach(article -> builder
+                .append("> 最新文章：")
+                .append(getArticleAddressMd(article))
+                .append("（创建于 ")
+                .append(article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .append("，更新于 ")
+                .append(article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .append("）\n"));
+        return builder.toString();
+    }
+
+    public List<Article> getLastArticles(int count) {
+        return list(Wrappers.<Article>lambdaQuery()
+                .gt(Article::getId, 1).eq(Article::getPublish, true)
+                .orderByDesc(Article::getUpdateTime).last("limit " + count));
+    }
+
+    public String getArticleAddressMd(Article article) {
+        int year = article.getCreateTime().getYear();
+        String month = String.format("%02d", article.getCreateTime().getMonthValue());
+        String day = String.format("%02d", article.getCreateTime().getDayOfMonth());
+        String host = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
+        return "[" + article.getTitle() + "](" + host + year + "/" + month + "/" + day + "/" + article.getTitle() + ")";
+    }
+
+
+
     /**
      * --------------------------------------------------------
      */
@@ -227,5 +310,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         info.put("category", articles.stream().flatMap(article -> ArticleUtil.str2List(article.getCategories()).stream()).collect(Collectors.toSet()));
         info.put("tag", articles.stream().flatMap(article -> ArticleUtil.str2List(article.getTags()).stream()).collect(Collectors.toSet()));
         return info;
+    }
+
+
+    public static void main(String[] args) {
+        String[] split = "xxxxxx".split("\n===\n");
+        System.out.println();
     }
 }

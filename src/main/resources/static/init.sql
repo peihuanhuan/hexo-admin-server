@@ -20,4 +20,11 @@ create table blog.user (
          deleted tinyint default 0
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
+<<<<<<< HEAD
 insert into blog.user values(1, 'admin', md5('123456'), 0);
+=======
+insert into blog.user values(1, 'admin', md5('123456'), 0);
+
+--  如果需要首页
+insert into article values (1,"index","index","","","","2100-10-10 00:00:00",now(),1,0);
+>>>>>>> origin/master

@@ -39,16 +39,17 @@ public class AuthorizationTokenFilter implements Filter {
 
         final String authToken = request.getHeader("X-Token");
 
-//        if (authToken == null) {
-//            RestResult resultVO = RestResult.error(ResultEnum.UNAUTHORIZED);
-//            WebUtils.responseWriteJson(resultVO, response);
-//            return;
-//        }
-//        if (!authToken.equals(userService.getToken())) {
-//            RestResult resultVO = RestResult.error(ResultEnum.AUTHORIZED_FAIL);
-//            WebUtils.responseWriteJson(resultVO, response);
-//            return;
-//        }
+
+        if (authToken == null) {
+            RestResult resultVO = RestResult.error(ResultEnum.UNAUTHORIZED);
+            WebUtils.responseWriteJson(resultVO, response);
+            return;
+        }
+        if (!authToken.equals(userService.getToken())) {
+            RestResult resultVO = RestResult.error(ResultEnum.AUTHORIZED_FAIL);
+            WebUtils.responseWriteJson(resultVO, response);
+            return;
+        }
         chain.doFilter(request, response);
     }
 }
