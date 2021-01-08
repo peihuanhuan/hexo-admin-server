@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: prod
+  servlet:
+    multipart:
+      max-request-size: 50MB
+      max-file-size: 50MB
+
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+server:
+  servlet:
+    context-path: /admin
