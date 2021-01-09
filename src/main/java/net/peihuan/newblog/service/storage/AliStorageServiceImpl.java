@@ -74,16 +74,18 @@ public class AliStorageServiceImpl implements StorageService {
             request.setRoleArn(aliyunConfig.getRoleArn());
             request.setRoleSessionName(aliyunConfig.getRoleSessionName());
             request.setPolicy(policy); // 若policy为空，则用户将获得该角色下所有权限
-            request.setDurationSeconds(1000L); // 设置凭证有效时间
+            request.setDurationSeconds(30L); // 设置凭证有效时间
             final AssumeRoleResponse response = client.getAcsResponse(request);
             Map<String, String> map = new HashMap<>();
             map.put("Expiration", response.getCredentials().getExpiration());
             map.put("accessKeyId", response.getCredentials().getAccessKeyId());
             map.put("accessKeySecret", response.getCredentials().getAccessKeySecret());
             map.put("securityToken", response.getCredentials().getSecurityToken());
+            map.put("ossStaticHost", aliyunConfig.getOss().getOssStaticHost());
             map.put("requestId", response.getRequestId());
             map.put("bucket", aliyunConfig.getOss().getBucketName());
             map.put("region", aliyunConfig.getOss().getRegion());
+
             log.info("Expiration: " + response.getCredentials().getExpiration());
             log.info("Access Key Id: " + response.getCredentials().getAccessKeyId());
             log.info("Access Key Secret: " + response.getCredentials().getAccessKeySecret());

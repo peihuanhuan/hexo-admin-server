@@ -12,7 +12,6 @@ public class BlogProperties {
 
     private String hexoPath = "/tmp";
 
-    private String staticHost;
 
     private AliyunConfig ali = new AliyunConfig();
 

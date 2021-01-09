@@ -191,7 +191,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     }
 
     private String correctImageAddress(String title, String content) {
-        String staticHost = blogProperties.getStaticHost();
+        String staticHost = blogProperties.getAli().getOss().getOssStaticHost();
         if (!staticHost.endsWith("/")) {
             staticHost = staticHost + "/";
         }

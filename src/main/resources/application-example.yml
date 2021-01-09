@@ -21,16 +21,13 @@ blog:
   # hexo文件夹在服务器上的public目录
   # 必填
   hexo-path: /www/wwwroot/bloghexo/public/
-  # 图片上传的资源地址，可以使用阿里oss提供的域名，也可配自有域名
-  # oss权限配置请遵循以下
-  # https://help.aliyun.com/document_detail/100624.html?spm=a2c4g.11186623.6.708.6892ca856zofuQ
-  # 后台前端 域名
-  static-host: https://XXXX.XXX/
   ali:
     # 必填
     access-key-id: XXXXXXXXX
     # 必填
     access-key-secret: XXXXXXXXX
+    # 角色权限配置请遵循以下
+    # https://help.aliyun.com/document_detail/100624.html?spm=a2c4g.11186623.6.708.6892ca856zofuQ
     # 必填
     roleArn: acs:ram::XXXXXXXX:role/XXX
     # 必填
@@ -38,6 +35,8 @@ blog:
     # 必填
     sts-endpoint: sts.cn-shanghai.aliyuncs.com
     oss:
+      # 图片上传的资源地址，可以使用阿里oss提供的域名，也可配自有域名
+      oss-static-host: http://blogbed.XXX.XXX/
       # 必填
       endpoint: http://oss-cn-shanghai.aliyuncs.com
       # 必填
