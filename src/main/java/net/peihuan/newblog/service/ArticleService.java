@@ -91,6 +91,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
         deleteFile(article.getPublishedTitle());
         log.info("--------------- 取消发布，删除文件 {}", article.getPublishedTitle());
+        try{
+            generateFile();
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
         cdnService.refreshHoleSite();
     }
 
@@ -114,6 +119,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             cdnService.refreshHoleSite();
         }
         save(article);
+        try{
+            generateFile();
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
         return article;
     }
 
@@ -169,7 +179,6 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 article.setPublish(form.getPublish());
             }
 
-            generateFile();
             updateById(article);
             return article;
         }

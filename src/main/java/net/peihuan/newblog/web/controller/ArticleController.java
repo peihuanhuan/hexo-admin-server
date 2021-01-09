@@ -51,6 +51,11 @@ public class ArticleController {
         articleService.unPublish(id);
         return RestResult.success();
     }
+    @PutMapping("/publish/{id}")
+    public RestResult publish(@PathVariable Long id) {
+        articleService.unPublish(id);
+        return RestResult.success();
+    }
 
     @PostMapping
     public RestResult newArticle(@RequestBody @Valid NewArticleForm form) {
