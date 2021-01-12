@@ -20,7 +20,7 @@ spring:
 blog:
   # hexo文件夹在服务器上的public目录
   # 必填
-  hexo-path: /www/wwwroot/bloghexo/public/
+  hexo-path: /www/wwwroot/bloghexo
   ali:
     # 必填
     access-key-id: XXXXXXXXX

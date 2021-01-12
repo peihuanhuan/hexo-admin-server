@@ -20,6 +20,7 @@ import net.peihuan.newblog.util.DateUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -41,7 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Slf4j
+ @Slf4j
 @Service
 public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
@@ -171,6 +172,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                                 article.getTitle(), article.getPublishedTitle());
                     }
                     article.setPublishedTitle(article.getTitle());
+                    try{
+                        generateFile();
+                    }catch (Exception ex){
+                        System.out.println(ex.getMessage());
+                    }
                     cdnService.refreshHoleSite();
                 } else {
                     deleteFile(article.getPublishedTitle());
