@@ -12,6 +12,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.peihuan.newblog.bean.entity.StsPolicy;
 import net.peihuan.newblog.bean.enums.ResultEnum;
 import net.peihuan.newblog.bean.vo.RestResult;
 import lombok.SneakyThrows;
@@ -20,6 +21,7 @@ import net.peihuan.newblog.bean.enums.ResultEnum;
 import net.peihuan.newblog.config.aliyun.AliyunConfig;
 import net.peihuan.newblog.config.BlogProperties;
 import net.peihuan.newblog.exception.BaseException;
+import net.peihuan.newblog.util.CacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,24 @@ public class AliStorageServiceImpl implements StorageService {
     public RestResult getPolicy() {
 
         AliyunConfig aliyunConfig = blogProperties.getAli();
+
+        Map<String, String> map = new HashMap<>();
+        map.put("ossStaticHost", aliyunConfig.getOss().getOssStaticHost());
+        map.put("bucket", aliyunConfig.getOss().getBucketName());
+        map.put("region", aliyunConfig.getOss().getRegion());
+
+        Object obj=CacheUtil.get("ossSecurityToken");
+        if(obj!=null){
+            StsPolicy stsPolicy=(StsPolicy)obj;
+            map.put("expiration", stsPolicy.getExpiration());
+            map.put("accessKeyId", stsPolicy.getAccessKeyId());
+            map.put("accessKeySecret", stsPolicy.getAccessKeySecret());
+            map.put("securityToken", stsPolicy.getSecurityToken());
+            map.put("requestId", stsPolicy.getRequestId());
+            log.info("Cache: Use cache of ossSecurityToken!");
+            return RestResult.success(map);
+        }
+
         String policy = "{\n" +
                 "    \"Version\": \"1\", \n" +
                 "    \"Statement\": [\n" +
@@ -70,21 +90,31 @@ public class AliStorageServiceImpl implements StorageService {
             // 用profile构造client
             DefaultAcsClient client = new DefaultAcsClient(profile);
             final AssumeRoleRequest request = new AssumeRoleRequest();
+            // 设置凭证有效时间,单位s AliSTS规定时间区间为 [900,3600](s)
+            Long expiration=3600L;
             request.setMethod(MethodType.POST);
             request.setRoleArn(aliyunConfig.getRoleArn());
             request.setRoleSessionName(aliyunConfig.getRoleSessionName());
-            request.setPolicy(policy); // 若policy为空，则用户将获得该角色下所有权限
-            request.setDurationSeconds(30L); // 设置凭证有效时间
+            // 若policy为空，则用户将获得该角色下所有权限
+            request.setPolicy(policy);
+            request.setDurationSeconds(expiration);
             final AssumeRoleResponse response = client.getAcsResponse(request);
-            Map<String, String> map = new HashMap<>();
-            map.put("Expiration", response.getCredentials().getExpiration());
-            map.put("accessKeyId", response.getCredentials().getAccessKeyId());
-            map.put("accessKeySecret", response.getCredentials().getAccessKeySecret());
-            map.put("securityToken", response.getCredentials().getSecurityToken());
-            map.put("ossStaticHost", aliyunConfig.getOss().getOssStaticHost());
-            map.put("requestId", response.getRequestId());
-            map.put("bucket", aliyunConfig.getOss().getBucketName());
-            map.put("region", aliyunConfig.getOss().getRegion());
+
+            // save cache
+            StsPolicy stsPolicy=new StsPolicy();
+            stsPolicy.setExpiration(response.getCredentials().getExpiration());
+            stsPolicy.setAccessKeyId(response.getCredentials().getAccessKeyId());
+            stsPolicy.setAccessKeySecret(response.getCredentials().getAccessKeySecret());
+            stsPolicy.setSecurityToken(response.getCredentials().getSecurityToken());
+            stsPolicy.setRequestId(response.getRequestId());
+            CacheUtil.put("ossSecurityToken",stsPolicy,expiration);
+            log.info("Cache: Put cache of ossSecurityToken , expiration: "+expiration.toString()+" s");
+
+            map.put("expiration", stsPolicy.getExpiration());
+            map.put("accessKeyId", stsPolicy.getAccessKeyId());
+            map.put("accessKeySecret", stsPolicy.getAccessKeySecret());
+            map.put("securityToken", stsPolicy.getSecurityToken());
+            map.put("requestId", stsPolicy.getRequestId());
 
             log.info("Expiration: " + response.getCredentials().getExpiration());
             log.info("Access Key Id: " + response.getCredentials().getAccessKeyId());
