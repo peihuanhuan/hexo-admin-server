@@ -31,7 +31,7 @@ public class FileController {
     }
 
     @GetMapping("/policy")
-    public RestResult uploadPolicy() {
-        return storageService.getPolicy();
+    public RestResult uploadPolicy(@RequestParam("title") String title) {
+        return storageService.getPolicy(title);
     }
 }

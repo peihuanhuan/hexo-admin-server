@@ -47,7 +47,7 @@ public class AliStorageServiceImpl implements StorageService {
     }
 
     @Override
-    public RestResult getPolicy() {
+    public RestResult getPolicy(String title) {
 
         AliyunConfig aliyunConfig = blogProperties.getAli();
 
