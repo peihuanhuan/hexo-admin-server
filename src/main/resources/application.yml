@@ -1,10 +1,11 @@
 spring:
   profiles:
-    active: local
+    active: prod
   servlet:
     multipart:
       max-request-size: 50MB
       max-file-size: 50MB
+
 
 mybatis-plus:
   global-config:
@@ -13,4 +14,3 @@ mybatis-plus:
 server:
   servlet:
     context-path: /admin
-

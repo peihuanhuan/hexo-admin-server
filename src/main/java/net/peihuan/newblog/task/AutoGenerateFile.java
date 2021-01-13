@@ -1,5 +1,6 @@
 package net.peihuan.newblog.task;
 
+import lombok.extern.apachecommons.CommonsLog;
 import lombok.extern.slf4j.Slf4j;
 import net.peihuan.newblog.bean.entity.Article;
 import net.peihuan.newblog.service.ArticleService;
@@ -10,26 +11,18 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class AutoUpdateIndex {
-
+public class AutoGenerateFile {
     @Autowired
     private ArticleService articleService;
     @Autowired
     private CdnService cdnService;
 
-    @Scheduled(cron = "0 0/15 * * * ?")
-    public void updateIndex() {
+    @Scheduled(cron = "0 0 * * * *")
+    public void generateHexoFile() {
 
-        log.info("开始定时更新 index");
-        Article article = articleService.getById(1L);
-        if (article == null) {
-            return;
-        }
-        articleService.updateIndexHtml(article.getContent());
-        cdnService.refreshHoleSite();
-
-        log.info("定时更新 index");
+        log.info("开始生成静态文件！");
+        articleService.generateFile();
+        log.info("定时生成静态文件成功");
 
     }
-
 }

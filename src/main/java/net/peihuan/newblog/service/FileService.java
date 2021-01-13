@@ -29,7 +29,6 @@ public class FileService {
         }
         String path = title + "/" + newName;
         storageService.upload(path, file);
-        return properties.getStaticHost() + path;
-
+        return properties.getAli().getOss().getOssStaticHost() + path;
     }
 }

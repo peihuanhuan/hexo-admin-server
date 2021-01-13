@@ -6,24 +6,46 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.p6spy.engine.spy.P6SpyDriver
     username: root
-    password: D8604CD49AC
+    password: 123456
     url: jdbc:p6spy:mysql://localhost:3306/blog?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+#  cloud:
+#    access-key: LTAI9HaozTIldIKb
+#    secret-key: Zwo5Y7SFPTu9W0ZCsSSsCLEzKMBVcN
+#    oss:
+#      endpoint: http://oss-cn-shanghai.aliyuncs.com
+
+
 
 
 blog:
-  # hexo文件夹在服务器上的目录
-  hexo-path: /root/myblog
-  # 图片上传的资源地址，可以使用阿里oss提供的域名，也可配自有域名
-  static-host: https://static.peihuan.net/
+  # hexo文件夹在服务器上的public目录
+  # 必填
+  hexo-path: /www/wwwroot/bloghexo
   ali:
-    access-key-id: LTAI4xxxxxxxxxxxxxxxx
-    access-key-secret: 6HQxxxxxxxxxxxxxx
+    # 必填
+    access-key-id: XXXXXXXXX
+    # 必填
+    access-key-secret: XXXXXXXXX
+    # 角色权限配置请遵循以下
+    # https://help.aliyun.com/document_detail/100624.html?spm=a2c4g.11186623.6.708.6892ca856zofuQ
+    # 必填
+    roleArn: acs:ram::XXXXXXXX:role/XXX
+    # 必填
+    roleSessionName: XXXXX
+    # 必填
+    sts-endpoint: sts.cn-shanghai.aliyuncs.com
     oss:
-      endpoint: http://oss-cn-hangzhou.aliyuncs.com
+      # 图片上传的资源地址，可以使用阿里oss提供的域名，也可配自有域名
+      oss-static-host: http://blogbed.XXX.XXX/
+      # 必填
+      endpoint: http://oss-cn-shanghai.aliyuncs.com
+      # 必填
+      region: oss-cn-shanghai
+      # 必填
       # 桶名称
-      bucket-name: your-bucket
+      bucket-name: XXXX
     cdn:
       # 可用区id https://help.aliyun.com/knowledge_detail/40654.html?spm=5176.13910061.0.0.75ca1477FdcLAM&aly_as=L5ikbwPc
-      regionId: cn-hangzhou
-      # 博客首页的域名
-      host: www.peihuan.net
+      regionId: cn-shanghai
+      # 博客前台的域名
+      host: www.XXX.XXX

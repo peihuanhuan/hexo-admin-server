@@ -15,18 +15,25 @@ import net.peihuan.newblog.mapper.ArticleMapper;
 import net.peihuan.newblog.service.cdn.CdnService;
 import net.peihuan.newblog.service.storage.StorageService;
 import net.peihuan.newblog.util.ArticleUtil;
+import net.peihuan.newblog.util.CmdUtil;
 import net.peihuan.newblog.util.DateUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Slf4j
+ @Slf4j
 @Service
 public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
@@ -52,7 +59,9 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     public Page page(String title, Integer page, Integer limit) {
         Page page1 = page(new Page(page, limit),
                 Wrappers.<Article>lambdaQuery().like(title != null, Article::getTitle, title)
+
                         .orderByDesc(Article::getCreateTime));
+
 
         page1.setRecords(ArticleUtil.convert2VO(page1.getRecords()));
         return page1;
@@ -83,6 +92,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
         deleteFile(article.getPublishedTitle());
         log.info("--------------- 取消发布，删除文件 {}", article.getPublishedTitle());
+        try{
+            generateFile();
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
         cdnService.refreshHoleSite();
     }
 
@@ -106,6 +120,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             cdnService.refreshHoleSite();
         }
         save(article);
+        try{
+            generateFile();
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
         return article;
     }
 
@@ -114,6 +133,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             NewArticleForm newForm = new NewArticleForm();
             BeanUtils.copyProperties(form, newForm);
             return publishNewArticle(newForm);
+
         } else if (form.getId() == 1) {
             Article article = updateIndexHtml(form.getContent());
             cdnService.refreshHoleSite();
@@ -152,6 +172,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                                 article.getTitle(), article.getPublishedTitle());
                     }
                     article.setPublishedTitle(article.getTitle());
+                    try{
+                        generateFile();
+                    }catch (Exception ex){
+                        System.out.println(ex.getMessage());
+                    }
                     cdnService.refreshHoleSite();
                 } else {
                     deleteFile(article.getPublishedTitle());
@@ -161,14 +186,18 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             }
 
             updateById(article);
-
             return article;
         }
     }
 
+    public void generateFile(){
+        // 生成静态文件
+        String[] shs = new String[]{"cd " + blogProperties.getHexoPath(), "pwd", "hexo g"};
+        CmdUtil.excuterBashs(shs);
+    }
 
     private String correctImageAddress(String title, String content) {
-        String staticHost = blogProperties.getStaticHost();
+        String staticHost = blogProperties.getAli().getOss().getOssStaticHost();
         if (!staticHost.endsWith("/")) {
             staticHost = staticHost + "/";
         }
@@ -220,6 +249,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
                 + "---\n"
                 + article.getContent();
     }
+
 
     @SneakyThrows
     public Article updateIndexHtml(String context) {
@@ -282,6 +312,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     }
 
 
+
     /**
      * --------------------------------------------------------
      */
@@ -295,6 +326,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         info.put("tag", articles.stream().flatMap(article -> ArticleUtil.str2List(article.getTags()).stream()).collect(Collectors.toSet()));
         return info;
     }
+
 
     public static void main(String[] args) {
         String[] split = "xxxxxx".split("\n===\n");
