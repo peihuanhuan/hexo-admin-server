@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.peihuan'
-version = '0.0.1'
+version = '0.0.3'
 sourceCompatibility = '1.8'
 
 repositories {
