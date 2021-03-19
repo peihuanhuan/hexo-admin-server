@@ -16,9 +16,8 @@ import org.springframework.util.DigestUtils;
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
 
-    // TODO: 2020-02-04
     @Getter
-    private String token = "123456";
+    private String token = StrUtils.uuid();
 
     public String login(String username, String password) {
         User user = getOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, username));

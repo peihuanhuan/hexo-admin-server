@@ -58,8 +58,8 @@ public class ArticleController {
     }
 
     @PostMapping
-    public RestResult newArticle(@RequestBody @Valid NewArticleForm form) {
-        Article article = articleService.publishNewArticle(form);
+    public RestResult newArticle(@RequestBody @Valid UpdateArticleForm form) {
+        Article article = articleService.updateArticle(form);
         return RestResult.success(String.valueOf(article.getId()));
     }
 
