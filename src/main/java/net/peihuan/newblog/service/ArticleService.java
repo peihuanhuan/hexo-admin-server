@@ -193,7 +193,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     private String generateHexoFileContent(Article article) {
         LocalDateTime createTime = article.getCreateTime();
         if (createTime == null) {
-            createTime = LocalDateTime.now();
+            createTime = getById(article.getId()).getCreateTime();
         }
         return "---\n" + "title: " + article.getTitle() + "\n" + "date: " + DateUtils.toString(createTime, DateUtils.YYYY_MM_DD_HH_MM_SS_DTF) + "\n" + "tags: " + article.getTags() + "\n" + "categories: " + article.getCategories() + "\n" + "---\n" + article.getContent();
     }
