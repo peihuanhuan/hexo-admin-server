@@ -8,44 +8,27 @@ spring:
     username: root
     password: 123456
     url: jdbc:p6spy:mysql://localhost:3306/blog?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
-#  cloud:
-#    access-key: LTAI9HaozTIldIKb
-#    secret-key: Zwo5Y7SFPTu9W0ZCsSSsCLEzKMBVcN
-#    oss:
-#      endpoint: http://oss-cn-shanghai.aliyuncs.com
-
-
-
 
 blog:
-  # hexo文件夹在服务器上的public目录
-  # 必填
+  # hexo根目录在服务器上的位置
   hexo-path: /www/wwwroot/bloghexo
   ali:
-    # 必填
+    # 该用户需要有 STS（前端上传图片）、OSS（移动文件对象）、CDN 的权限
     access-key-id: XXXXXXXXX
-    # 必填
     access-key-secret: XXXXXXXXX
-    # 角色权限配置请遵循以下
+    # 角色权限配置请遵循以下，用于前端上传图片
     # https://help.aliyun.com/document_detail/100624.html?spm=a2c4g.11186623.6.708.6892ca856zofuQ
-    # 必填
     roleArn: acs:ram::XXXXXXXX:role/XXX
-    # 必填
     roleSessionName: XXXXX
-    # 必填
     sts-endpoint: sts.cn-shanghai.aliyuncs.com
     oss:
       # 图片上传的资源地址，可以使用阿里oss提供的域名，也可配自有域名
-      oss-static-host: http://blogbed.XXX.XXX/
-      # 必填
+      oss-static-host: http://static.peihuan.net/ 
       endpoint: http://oss-cn-shanghai.aliyuncs.com
-      # 必填
       region: oss-cn-shanghai
-      # 必填
-      # 桶名称
       bucket-name: XXXX
     cdn:
       # 可用区id https://help.aliyun.com/knowledge_detail/40654.html?spm=5176.13910061.0.0.75ca1477FdcLAM&aly_as=L5ikbwPc
       regionId: cn-shanghai
-      # 博客前台的域名
-      host: www.XXX.XXX
+      # 博客前台的域名，即cdn刷新的域名
+      host: www.peihuan.net
