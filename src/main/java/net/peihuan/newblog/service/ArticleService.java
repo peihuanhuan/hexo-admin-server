@@ -18,10 +18,10 @@ import net.peihuan.newblog.util.ArticleUtil;
 import net.peihuan.newblog.util.CmdUtil;
 import net.peihuan.newblog.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -236,12 +236,13 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         return list(Wrappers.<Article>lambdaQuery().gt(Article::getId, 1).eq(Article::getPublish, true).orderByDesc(Article::getUpdateTime).last("limit " + count));
     }
 
+    @SneakyThrows
     public String getArticleAddressMd(Article article) {
         int year = article.getCreateTime().getYear();
         String month = String.format("%02d", article.getCreateTime().getMonthValue());
         String day = String.format("%02d", article.getCreateTime().getDayOfMonth());
         String host = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
-        return "[" + article.getTitle() + "](" + host + year + "/" + month + "/" + day + "/" + article.getTitle() + ")";
+        return "[" + article.getTitle() + "](" + host + year + "/" + month + "/" + day + "/" + URLEncoder.encode( article.getTitle(), "utf-8") + ")";
     }
 
 
