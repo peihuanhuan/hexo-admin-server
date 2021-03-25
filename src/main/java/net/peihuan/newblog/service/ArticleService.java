@@ -12,10 +12,8 @@ import net.peihuan.newblog.bean.form.UpdateArticleForm;
 import net.peihuan.newblog.config.BlogProperties;
 import net.peihuan.newblog.exception.BaseException;
 import net.peihuan.newblog.mapper.ArticleMapper;
-import net.peihuan.newblog.service.cdn.CdnService;
 import net.peihuan.newblog.service.storage.StorageService;
 import net.peihuan.newblog.util.ArticleUtil;
-import net.peihuan.newblog.util.CmdUtil;
 import net.peihuan.newblog.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +61,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
         }
         removeById(articleId);
-        deleteArticleFile(article.getPublishedTitle());
+        deleteOriginalArticleFile(article.getPublishedTitle());
         log.info("--------------- 删除文件 {}", article.getPublishedTitle());
         commonService.generateHexoAndRefreshCdn();
     }
@@ -79,7 +77,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         update.setPublish(false);
         updateById(update);
 
-        deleteArticleFile(article.getPublishedTitle());
+        deleteOriginalArticleFile(article.getPublishedTitle());
         log.info("--------------- 取消发布，删除文件 {}", article.getPublishedTitle());
         commonService.generateHexoAndRefreshCdn();
     }
@@ -110,6 +108,8 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
         Article update = new Article();
 
+        Article originalArticle = getById(form.getId());
+
         if (form.getPublish() != null && form.getPublish()) {
             // 只有发布的时候才会更改图片的路径
             update.setContent(correctImageAddress(form.getTitle(), form.getContent()));
@@ -125,10 +125,12 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         update.setUpdateTime(LocalDateTime.now());
         update.setPublish(form.getPublish());
 
+
         if (form.getPublish() != null) {
-            deleteArticleFile(update.getPublishedTitle());
+            deleteOriginalArticleFile(originalArticle.getPublishedTitle());
             if (form.getPublish()) {
-                saveArticleFileToDisk(update);
+                String content = generateHexoFileContent(update, originalArticle.getCreateTime());
+                saveArticleFileToDisk(update.getTitle(), content);
                 update.setPublishedTitle(update.getTitle());
             }
             commonService.generateHexoAndRefreshCdn();
@@ -170,31 +172,27 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
 
     @SneakyThrows
-    private void saveArticleFileToDisk(Article article) {
+    private void saveArticleFileToDisk(String title, String content) {
         String dir = blogProperties.getHexoPath() + "/source/_posts/";
         Path dirPath = Paths.get(dir);
         if (!Files.isWritable(dirPath)) {
             Files.createDirectories(dirPath);
         }
-        Path filePath = Paths.get(dir + article.getTitle() + ".md");
+        Path filePath = Paths.get(dir + title + ".md");
         Files.deleteIfExists(filePath);
         Files.createFile(filePath);
-        String content = generateHexoFileContent(article);
         Files.write(filePath, content.getBytes());
     }
 
     @SneakyThrows
-    private void deleteArticleFile(String title) {
+    private void deleteOriginalArticleFile(String title) {
         Path filePath = Paths.get(blogProperties.getHexoPath() + "/source/_posts/" + title + ".md");
+        log.info("------------- 删除文件 {}", filePath.toString());
         Files.deleteIfExists(filePath);
     }
 
 
-    private String generateHexoFileContent(Article article) {
-        LocalDateTime createTime = article.getCreateTime();
-        if (createTime == null) {
-            createTime = getById(article.getId()).getCreateTime();
-        }
+    private String generateHexoFileContent(Article article, LocalDateTime createTime) {
         return "---\n" + "title: " + article.getTitle() + "\n" + "date: " + DateUtils.toString(createTime, DateUtils.YYYY_MM_DD_HH_MM_SS_DTF) + "\n" + "tags: " + article.getTags() + "\n" + "categories: " + article.getCategories() + "\n" + "---\n" + article.getContent();
     }
 
