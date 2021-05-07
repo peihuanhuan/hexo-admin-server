@@ -1,16 +1,30 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="P 151_Reverse Words In A String" />
+      <item value="String" />
+      <item value="reverse Words" />
+      <item value="like" />
+      <item value="not" />
+      <item value="hello" />
+      <item value="输入：&quot;  hello world!  &quot;" />
       <item value="blue" />
     </histories>
     <option name="languageScores">
       <map>
-        <entry key="CHINESE" value="1" />
-        <entry key="ENGLISH" value="1" />
+        <entry key="CHINESE" value="3" />
+        <entry key="ENGLISH" value="4" />
       </map>
     </option>
   </component>
   <component name="Cache">
     <option name="lastTrimTime" value="1620358589402" />
+  </component>
+  <component name="Settings">
+    <option name="googleTranslateSettings">
+      <google-translate>
+        <option name="useTranslateGoogleCom" value="true" />
+      </google-translate>
+    </option>
   </component>
 </application>
