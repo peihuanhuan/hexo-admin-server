@@ -1,0 +1,5 @@
+<application>
+  <component name="JetEditorOptions">
+    <option name="donTShowConversionDialog" value="true" />
+  </component>
+</application>
