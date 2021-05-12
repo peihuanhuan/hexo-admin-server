@@ -4,6 +4,7 @@
       <list>
         <option value="$USER_HOME$/Downloads" />
         <option value="$USER_HOME$/workspace" />
+        <option value="$USER_HOME$/persional_workspace" />
       </list>
     </option>
   </component>
