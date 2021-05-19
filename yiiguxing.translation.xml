@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="stroke Width" />
       <item value="positional" />
       <item value="flat" />
       <item value="Refactor" />
@@ -16,13 +17,13 @@
     </histories>
     <option name="languageScores">
       <map>
-        <entry key="CHINESE" value="7" />
-        <entry key="ENGLISH" value="8" />
+        <entry key="CHINESE" value="8" />
+        <entry key="ENGLISH" value="9" />
       </map>
     </option>
   </component>
   <component name="Cache">
-    <option name="lastTrimTime" value="1620911722583" />
+    <option name="lastTrimTime" value="1621434499251" />
   </component>
   <component name="Settings">
     <option name="googleTranslateSettings">
