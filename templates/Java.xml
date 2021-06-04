@@ -1,5 +1,5 @@
 <templateSet group="Java">
-  <template name="tr" value="try {&#10;            &#10;} catch (Throwable t) {&#10;            &#10;}" description="捕捉异常模板" toReformat="false" toShortenFQNames="true">
+  <template name="tr" value="try {&#10;            &#10;} catch (Exception t) {&#10;            &#10;}" description="捕捉异常模板" toReformat="false" toShortenFQNames="true">
     <context>
       <option name="JAVA_CODE" value="true" />
     </context>
