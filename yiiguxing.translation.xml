@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="effective" />
       <item value="invoke All" />
       <item value="integritycheck" />
       <item value="integrity" />
@@ -24,8 +25,8 @@
     </histories>
     <option name="languageScores">
       <map>
-        <entry key="CHINESE" value="14" />
-        <entry key="ENGLISH" value="15" />
+        <entry key="CHINESE" value="15" />
+        <entry key="ENGLISH" value="16" />
         <entry key="ITALIAN" value="1" />
       </map>
     </option>
