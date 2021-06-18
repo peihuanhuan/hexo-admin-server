@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="S circular" />
       <item value="Banner" />
       <item value="deserialize" />
       <item value="effective" />
@@ -27,14 +28,14 @@
     </histories>
     <option name="languageScores">
       <map>
-        <entry key="CHINESE" value="17" />
-        <entry key="ENGLISH" value="18" />
+        <entry key="CHINESE" value="19" />
+        <entry key="ENGLISH" value="20" />
         <entry key="ITALIAN" value="1" />
       </map>
     </option>
   </component>
   <component name="Cache">
-    <option name="lastTrimTime" value="1623054165227" />
+    <option name="lastTrimTime" value="1623987778705" />
   </component>
   <component name="Settings">
     <option name="googleTranslateSettings">
