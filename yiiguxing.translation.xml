@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="require MaterialLocalizations to be provided by a Localizations widget ancestor." />
       <item value="S circular" />
       <item value="Banner" />
       <item value="deserialize" />
