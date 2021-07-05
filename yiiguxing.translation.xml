@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="Creates a dropdown button. The [items] must have distinct values. If [value] isn't null then it must be equal to one of the [DropdownMenuItem] values. If [items] or [onChanged] is null, the button will be disabled, the down arrow will be greyed out. If [value] is null and the button is enabled, [hint] will be displayed if it is non-null. If [value] is null and the button is disabled, [disabledHint] will be displayed if it is non-null. If [disabledHint] is null, then [hint] will be displayed if it is non-null. The [elevation] and [iconSize] arguments must not be null (they both have defaults, so do not need to be specified). The boolean [isDense] and [isExpanded] arguments must not be null. The [autofocus] argument must not be null. The [dropdownColor] argument specifies the background color of the dropdown when it is open. If it is null, the current theme's [ThemeData.canvasColor] will be used instead." />
       <item value="park Nanos" />
       <item value="require MaterialLocalizations to be provided by a Localizations widget ancestor." />
       <item value="S circular" />
@@ -31,14 +32,14 @@
     <option name="languageScores">
       <map>
         <entry key="CHINESE" value="20" />
-        <entry key="ENGLISH" value="20" />
+        <entry key="ENGLISH" value="21" />
         <entry key="GREEK" value="1" />
         <entry key="ITALIAN" value="1" />
       </map>
     </option>
   </component>
   <component name="Cache">
-    <option name="lastTrimTime" value="1624958362588" />
+    <option name="lastTrimTime" value="1625505244074" />
   </component>
   <component name="Settings">
     <option name="googleTranslateSettings">
