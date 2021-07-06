@@ -1,6 +1,7 @@
 <application>
   <component name="AppStorage">
     <histories>
+      <item value="query Send Coupon Activity" />
       <item value="Syncpo" />
       <item value="Intelligence" />
       <item value="calc Intelligence Wx Channel" />
@@ -35,8 +36,8 @@
     </histories>
     <option name="languageScores">
       <map>
-        <entry key="CHINESE" value="23" />
-        <entry key="ENGLISH" value="24" />
+        <entry key="CHINESE" value="24" />
+        <entry key="ENGLISH" value="25" />
         <entry key="GREEK" value="1" />
         <entry key="ITALIAN" value="1" />
       </map>
