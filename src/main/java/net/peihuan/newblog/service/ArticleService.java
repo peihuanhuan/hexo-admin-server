@@ -48,7 +48,9 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
     @SuppressWarnings("unchecked")
     public Page page(String title, Integer page, Integer limit) {
-        Page page1 = page(new Page(page, limit), Wrappers.<Article>lambdaQuery().like(title != null, Article::getTitle, title).orderByDesc(Article::getCreateTime));
+        Page page1 = page(new Page(page, limit), Wrappers.<Article>lambdaQuery()
+                .like(title != null, Article::getTitle, title)
+                .orderByDesc(Article::getUpdateTime));
 
         page1.setRecords(ArticleUtil.convert2VO(page1.getRecords()));
         return page1;
@@ -226,7 +228,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     private String getNewArticles() {
         List<Article> lastArticles = getLastArticles(10);
         StringBuilder builder = new StringBuilder();
-        lastArticles.forEach(article -> builder.append("> 最新文章：").append(getArticleAddressMd(article)).append("（创建于 ").append(article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("，更新于 ").append(article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
+        lastArticles.forEach(article -> builder.append("> 最新文章：").append(getArticleUrl(article)).append("（创建于 ").append(article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("，更新于 ").append(article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
         return builder.toString();
     }
 
@@ -235,12 +237,15 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     }
 
     @SneakyThrows
-    public String getArticleAddressMd(Article article) {
+    public String getArticleUrl(Article article) {
         int year = article.getCreateTime().getYear();
         String month = String.format("%02d", article.getCreateTime().getMonthValue());
         String day = String.format("%02d", article.getCreateTime().getDayOfMonth());
         String host = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
-        return "[" + article.getTitle() + "](" + host + year + "/" + month + "/" + day + "/" + URLEncoder.encode( article.getTitle(), "utf-8") + ")";
+        String encodeTitle = URLEncoder.encode(article.getTitle(), "utf-8");
+        // 加号需要替换成 %20
+        encodeTitle = encodeTitle.replaceAll("\\+", "%20");
+        return "[" + article.getTitle() + "](" + host + year + "/" + month + "/" + day + "/" + encodeTitle + ")";
     }
 
 
