@@ -18,6 +18,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @PostMapping("login")
     public RestResult login(@Valid @RequestBody LoginForm form) {
         return RestResult.success("token", userService.login(form.getUsername(), form.getPassword()));
