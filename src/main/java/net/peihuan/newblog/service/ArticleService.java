@@ -212,7 +212,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         }
         String md = before + getNewArticles() + after;
 
-        Path filePath = Paths.get(blogProperties.getHexoPath() + "/source/blog/index.md");
+        Path filePath = Paths.get(blogProperties.getHexoPath() + "/source/home/index.md");
         Files.deleteIfExists(filePath);
         Files.createFile(filePath);
 
