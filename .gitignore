@@ -6,6 +6,8 @@ build/
 !**/src/test/**
 src/main/resources/application-local.yml
 src/main/resources/application-prod.yml
+src/main/resources/application-dev.yml
+src/main/resources/credential/**
 
 ### STS ###
 .apt_generated

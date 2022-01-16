@@ -202,7 +202,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     @SneakyThrows
     public Article updateHomePageHtml(String context) {
         String[] split = context.split("\n===\n");
-        String before = null;
+        String before = "";
         String after;
         if (split.length == 1) {
             after = split[0];
@@ -228,7 +228,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     private String getNewArticles() {
         List<Article> lastArticles = getLastArticles(10);
         StringBuilder builder = new StringBuilder();
-        lastArticles.forEach(article -> builder.append("> 最新文章：").append(getArticleUrl(article)).append("（创建于 ").append(article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("，更新于 ").append(article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
+        lastArticles.forEach(article -> builder.append("> 最新文章：")
+                .append(getArticleUrl(article))
+                .append("（创建于 ").append(article.getCreateTime()==null?"????-??-??":article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .append("，更新于 ")
+                .append(article.getUpdateTime()==null?"????-??-??":article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
         return builder.toString();
     }
 
@@ -238,9 +242,15 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
     @SneakyThrows
     public String getArticleUrl(Article article) {
-        int year = article.getCreateTime().getYear();
-        String month = String.format("%02d", article.getCreateTime().getMonthValue());
-        String day = String.format("%02d", article.getCreateTime().getDayOfMonth());
+        String year = "??";
+        String month="??";
+        String day ="??";
+        if(article.getCreateTime()!=null){
+            year =  String.format("%02d",article.getCreateTime().getYear());
+            month = String.format("%02d", article.getCreateTime().getMonthValue());
+            day = String.format("%02d", article.getCreateTime().getDayOfMonth());
+        }
+
         String host = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
         String encodeTitle = URLEncoder.encode(article.getTitle(), "utf-8");
         // 加号需要替换成 %20
