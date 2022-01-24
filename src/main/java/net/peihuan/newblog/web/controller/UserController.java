@@ -24,8 +24,15 @@ public class UserController {
         return RestResult.success("token", userService.login(form.getUsername(), form.getPassword()));
     }
 
+    @PostMapping("loginGuest")
+    public RestResult loginGuest(@Valid @RequestBody LoginForm form){
+        return RestResult.success("token", userService.loginGuest(form.getUsername(), form.getPassword()));
+
+    }
+
     @PostMapping("logout")
     public RestResult logout() {
+        userService.loginOut();
         return RestResult.success();
     }
 }

@@ -33,6 +33,8 @@ public class Article {
     @TableLogic
     private Boolean deleted;
 
+    private Long userId;
+
     public Article(){
         this.createTime=LocalDateTime.now();
     }
