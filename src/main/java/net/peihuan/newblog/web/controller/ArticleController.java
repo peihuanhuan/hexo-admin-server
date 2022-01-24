@@ -1,14 +1,11 @@
 package net.peihuan.newblog.web.controller;
 
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import net.peihuan.newblog.bean.entity.Article;
-import net.peihuan.newblog.bean.form.NewArticleForm;
 import net.peihuan.newblog.bean.form.UpdateArticleForm;
 import net.peihuan.newblog.bean.vo.RestResult;
 import net.peihuan.newblog.service.ArticleService;
 import net.peihuan.newblog.util.ArticleUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,9 +65,9 @@ public class ArticleController {
      * @param id
      * @return
      */
-    @PutMapping("/unpublish/{id}")
-    public RestResult unpublish(@PathVariable Long id) {
-        articleService.unPublish(id);
+    @PutMapping("/cancelPublish/{id}")
+    public RestResult cancelPublish(@PathVariable Long id) {
+        articleService.cancelPublish(id);
         return RestResult.success();
     }
 
@@ -116,9 +113,9 @@ public class ArticleController {
      * @param form
      * @return
      */
-    @PutMapping
-    public  RestResult updateAndPublishArticle(@RequestBody @Valid UpdateArticleForm form){
-        Article article = articleService.updateAndPublish(form);
+    @PostMapping("/addUpdateAndPublish")
+    public  RestResult addUpdateAndPublishArticle(@RequestBody @Valid UpdateArticleForm form){
+        Article article = articleService.addUpdateAndPublish(form);
         RestResult result = RestResult.success("content", article.getContent());
         ((Map)result.getData()).put("id", String.valueOf(article.getId()));
         return result;

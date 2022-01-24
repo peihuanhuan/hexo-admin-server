@@ -71,7 +71,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         commonService.generateHexoAndRefreshCdn();
     }
 
-    public void unPublish(Long articleId) {
+    public void cancelPublish(Long articleId) {
         Article article = getById(articleId);
         if (article == null) {
             throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
@@ -93,7 +93,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
      * @param form
      * @return
      */
-    public Article updateAndPublish(UpdateArticleForm form) {
+    public Article addUpdateAndPublish(UpdateArticleForm form) {
 
         // 1. 新增或更新文章
         Article article = addOrUpdateArticle(form);

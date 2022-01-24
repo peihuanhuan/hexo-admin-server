@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import sun.security.provider.MD5;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -87,8 +86,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         jsonObject.add("roles",roles);
         if(one.getRole()==1){
             jsonObject.addProperty("avatar","https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/dogplane.jpg");
+        }else {
+            jsonObject.addProperty("avatar","https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/cat.jpg");
         }
-        jsonObject.addProperty("avatar","https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/cat.jpg");
         jsonObject.addProperty("name",one.getRole()==1?"超级管理员":"游客");
         return new Gson().toJson(jsonObject);
     }
