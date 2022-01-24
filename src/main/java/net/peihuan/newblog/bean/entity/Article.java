@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 public class Article {
@@ -31,4 +32,10 @@ public class Article {
     private Boolean publish;
     @TableLogic
     private Boolean deleted;
+
+    private Long userId;
+
+    public Article(){
+        this.createTime=LocalDateTime.now();
+    }
 }

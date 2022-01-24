@@ -20,7 +20,12 @@ public class CommonService {
     @Async
     public void generateHexoAndRefreshCdn() {
         executeHexoGenerateCommand();
-        cdnService.refreshHoleSite();
+        try {
+            cdnService.refreshHoleSite();
+        }catch (RuntimeException e){
+            log.info("cdn同步错误");
+            log.info(e.getMessage());
+        }
     }
 
     public void executeHexoGenerateCommand() {

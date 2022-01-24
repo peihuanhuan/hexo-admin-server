@@ -1,5 +1,6 @@
 package net.peihuan.newblog.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +39,8 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
-
+    @Autowired
+    HttpServletRequest httpServletRequest;
     @Autowired
     private BlogProperties blogProperties;
     @Autowired
@@ -50,12 +53,12 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     public Page page(String title, Integer page, Integer limit) {
         Page page1 = page(new Page(page, limit), Wrappers.<Article>lambdaQuery()
                 .like(title != null, Article::getTitle, title)
+                .eq(Article::getUserId, httpServletRequest.getHeader("X-Token").split("_")[0])
                 .orderByDesc(Article::getUpdateTime));
 
         page1.setRecords(ArticleUtil.convert2VO(page1.getRecords()));
         return page1;
     }
-
 
     public void deleteArticle(Long articleId) {
         Article article = getById(articleId);
@@ -68,7 +71,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         commonService.generateHexoAndRefreshCdn();
     }
 
-    public void unPublish(Long articleId) {
+    public void cancelPublish(Long articleId) {
         Article article = getById(articleId);
         if (article == null) {
             throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
@@ -84,6 +87,140 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         commonService.generateHexoAndRefreshCdn();
     }
 
+    /**
+     * 更新并发布文章
+     *
+     * @param form
+     * @return
+     */
+    public Article addUpdateAndPublish(UpdateArticleForm form) {
+
+        // 1. 新增或更新文章
+        Article article = addOrUpdateArticle(form);
+
+        // 2. 发布文章
+        publishArticle(article);
+
+        return article;
+    }
+
+    /**
+     * 发布某个id的文章
+     * @param articleId
+     */
+    public void publishById(Long articleId) {
+        // 1. 取出文章
+        Article article = getById(articleId);
+        if (article == null) {
+            throw new BaseException(ResultEnum.ARTICLE_NOT_FOUND);
+        }
+
+        // 2. 发布文章
+        publishArticle(article);
+    }
+
+    /**
+     * 发布文章
+     * @param article
+     */
+    public void publishArticle(Article article) {
+        // 1. 更新文章状态
+        article.setPublish(true);
+        article.setPublishedTitle(article.getTitle());
+        updateById(article);
+
+        // 2. 生成文章内容
+        String content = generateHexoFileContent(article, article.getCreateTime());
+
+        // 3. 保存文章到磁盘
+        saveArticleFileToDisk(article.getPublishedTitle(), content);
+
+        // 4. 执行hexo生成并刷新CDN
+        commonService.generateHexoAndRefreshCdn();
+    }
+
+    /**
+     * 增加或更新文章
+     * @param form
+     * @return
+     */
+    public Article addOrUpdateArticle(UpdateArticleForm form) {
+        // 如果id为null就执行新增文章
+        if (form.getId() == null) {
+            return addArticle(form);
+        } else {
+            // 否则就执行更新文章
+            return update1Article(form);
+        }
+    }
+
+    /**
+     * 添加文章（可以添加所有文章，包含about home等特殊文章）
+     *
+     * @param form
+     * @return
+     */
+    public Article addArticle(UpdateArticleForm form) {
+        // 1. 给id
+        form.setId(IdWorker.getId());
+        // 2. 更新首页
+        if (isHomePage(form)) {
+            Article article = updateHomePageHtml(form.getContent());
+            commonService.generateHexoAndRefreshCdn();
+            return article;
+        }
+        // 3. 如果已经存在 已经发布&&同名 的文章，报文章存在错误
+        Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle()).eq(Article::getPublish, true));
+        if (one != null && !one.getId().equals(form.getId())) {
+            throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
+        }
+        // 4. 保存
+        Article articleToAdd = new Article();
+        articleToAdd.setId(form.getId());
+        articleToAdd.setContent(form.getContent());
+        articleToAdd.setTitle(form.getTitle());
+        articleToAdd.setTags(ArticleUtil.list2Str(form.getTags()));
+        articleToAdd.setCategories(ArticleUtil.list2Str(form.getCategories()));
+        articleToAdd.setUpdateTime(LocalDateTime.now());
+        articleToAdd.setPublish(form.getPublish());
+        articleToAdd.setUserId(Long.parseLong(httpServletRequest.getHeader("X-Token").split("_")[0]));
+        save(articleToAdd);
+        return articleToAdd;
+    }
+
+    /**
+     * 更新文章，（可以更新所有文章，包括特殊文章，即 home、about等）
+     *
+     * @param form
+     * @return
+     */
+    public Article update1Article(UpdateArticleForm form) {
+        // 1. 更新首页
+        if (isHomePage(form)) {
+            Article article = updateHomePageHtml(form.getContent());
+            commonService.generateHexoAndRefreshCdn();
+            return article;
+        }
+
+        // 2. 如果发布了的文章标题已经存在，则报标题存在错误
+        Article one = getOne(Wrappers.<Article>lambdaQuery().eq(Article::getPublishedTitle, form.getTitle()).eq(Article::getPublish, true));
+        if (one != null && !one.getId().equals(form.getId())) {
+            throw new BaseException(ResultEnum.ARTICLE_TITLE_EXIST);
+        }
+
+        // 3. 更新
+        Article articleToUpdate = new Article();
+        articleToUpdate.setId(form.getId());
+        articleToUpdate.setContent(form.getContent());
+        articleToUpdate.setTitle(form.getTitle());
+        articleToUpdate.setTags(ArticleUtil.list2Str(form.getTags()));
+        articleToUpdate.setCategories(ArticleUtil.list2Str(form.getCategories()));
+        articleToUpdate.setUpdateTime(LocalDateTime.now());
+        articleToUpdate.setPublish(form.getPublish());
+        articleToUpdate.setUserId(Long.parseLong(httpServletRequest.getHeader("X-Token").split("_")[0]));
+        updateById(articleToUpdate);
+        return articleToUpdate;
+    }
 
     public Article updateArticle(UpdateArticleForm form) {
 
@@ -96,6 +233,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
             commonService.generateHexoAndRefreshCdn();
             return article;
         }
+
 
         return updateArticleCore(form);
     }
@@ -126,6 +264,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         update.setCategories(ArticleUtil.list2Str(form.getCategories()));
         update.setUpdateTime(LocalDateTime.now());
         update.setPublish(form.getPublish());
+        update.setUserId(Long.parseLong(httpServletRequest.getHeader("X-Token").split("_")[0]));
 
 
         if (form.getPublish() != null) {
@@ -143,11 +282,9 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     }
 
 
-
     private boolean isHomePage(UpdateArticleForm form) {
         return form.getId() == 1;
     }
-
 
 
     private String correctImageAddress(String title, String content) {
@@ -202,7 +339,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     @SneakyThrows
     public Article updateHomePageHtml(String context) {
         String[] split = context.split("\n===\n");
-        String before = null;
+        String before = "";
         String after;
         if (split.length == 1) {
             after = split[0];
@@ -228,7 +365,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
     private String getNewArticles() {
         List<Article> lastArticles = getLastArticles(10);
         StringBuilder builder = new StringBuilder();
-        lastArticles.forEach(article -> builder.append("> 最新文章：").append(getArticleUrl(article)).append("（创建于 ").append(article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("，更新于 ").append(article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
+        lastArticles.forEach(article -> builder.append("> 最新文章：")
+                .append(getArticleUrl(article))
+                .append("（创建于 ").append(article.getCreateTime() == null ? "????-??-??" : article.getCreateTime().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .append("，更新于 ")
+                .append(article.getUpdateTime() == null ? "????-??-??" : article.getUpdateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("）\n"));
         return builder.toString();
     }
 
@@ -238,9 +379,15 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
 
     @SneakyThrows
     public String getArticleUrl(Article article) {
-        int year = article.getCreateTime().getYear();
-        String month = String.format("%02d", article.getCreateTime().getMonthValue());
-        String day = String.format("%02d", article.getCreateTime().getDayOfMonth());
+        String year = "??";
+        String month = "??";
+        String day = "??";
+        if (article.getCreateTime() != null) {
+            year = String.format("%02d", article.getCreateTime().getYear());
+            month = String.format("%02d", article.getCreateTime().getMonthValue());
+            day = String.format("%02d", article.getCreateTime().getDayOfMonth());
+        }
+
         String host = "https://" + blogProperties.getAli().getCdn().getHost() + "/";
         String encodeTitle = URLEncoder.encode(article.getTitle(), "utf-8");
         // 加号需要替换成 %20
@@ -254,7 +401,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
      */
 
     public Map<String, Object> info() {
-        List<Article> articles = list();
+        List<Article> articles = list(new LambdaQueryWrapper<Article>().eq(Article::getUserId, httpServletRequest.getHeader("X-Token").split("_")[0]));
         Map<String, Object> info = new HashMap<>();
         info.put("published", articles.stream().filter(Article::getPublish).count());
         info.put("unPublished", articles.stream().filter(a -> !a.getPublish()).count());
@@ -262,5 +409,6 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         info.put("tag", articles.stream().flatMap(article -> ArticleUtil.str2List(article.getTags()).stream()).collect(Collectors.toSet()));
         return info;
     }
+
 
 }

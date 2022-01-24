@@ -32,7 +32,7 @@ public class AuthorizationTokenFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
         String url = request.getRequestURI();
 
-        if (url.equals("/admin/login")) {
+        if (url.equals("/admin/login") || url.equals("/admin/loginGuest")) {
             chain.doFilter(request, response);
             return;
         }
@@ -45,7 +45,8 @@ public class AuthorizationTokenFilter implements Filter {
             WebUtils.responseWriteJson(resultVO, response);
             return;
         }
-        if (!authToken.equals(userService.getToken())) {
+//        if (!authToken.equals(userService.getToken())) {
+        if (!userService.getTokenSet().contains(authToken)) {
             RestResult resultVO = RestResult.error(ResultEnum.AUTHORIZED_FAIL);
             WebUtils.responseWriteJson(resultVO, response);
             return;
