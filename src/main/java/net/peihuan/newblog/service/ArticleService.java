@@ -129,6 +129,11 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         article.setPublishedTitle(article.getTitle());
         updateById(article);
 
+
+        if (article.getId() == 1) {
+            return;
+        }
+
         // 2. 生成文章内容
         String content = generateHexoFileContent(article, article.getCreateTime());
 
@@ -209,8 +214,7 @@ public class ArticleService extends ServiceImpl<ArticleMapper, Article> {
         }
 
         // 3. 更新
-        Article articleToUpdate = new Article();
-        articleToUpdate.setId(form.getId());
+        Article articleToUpdate = getById(form.getId());
         articleToUpdate.setContent(form.getContent());
         articleToUpdate.setTitle(form.getTitle());
         articleToUpdate.setTags(ArticleUtil.list2Str(form.getTags()));
